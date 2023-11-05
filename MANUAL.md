@@ -9,9 +9,9 @@
 ### Just grab metadata
 
 ```js
-import { Masterchat, stringify } from "masterchat";
+import { Masterchat, stringify } from 'masterchat';
 
-const { title, channelId, channelName } = await Masterchat.init("<videoId>");
+const { title, channelId, channelName } = await Masterchat.init('<videoId>');
 
 console.log(`info: ${title} @ ${channelName} (${channelId})`);
 ```
@@ -69,119 +69,117 @@ mc.listen();
 #### Async Iterator API
 
 ```js
-import { Masterchat, MasterchatError, stringify } from "masterchat";
+import { Masterchat, MasterchatError, stringify } from 'masterchat';
 
 try {
-  const mc = await Masterchat.init("<videoId>");
+	const mc = await Masterchat.init('<videoId>');
 
-  const chats = mc
-    .iter()
-    .filter((action) => action.type === "addChatItemAction");
+	const chats = mc.iter().filter((action) => action.type === 'addChatItemAction');
 
-  for await (const chat of chats) {
-    console.log(`${chat.authorName}: ${stringify(chat.message)}`);
-  }
+	for await (const chat of chats) {
+		console.log(`${chat.authorName}: ${stringify(chat.message)}`);
+	}
 } catch (err) {
-  // Handle errors
-  if (err instanceof MasterchatError) {
-    console.log(err.code);
-    // "disabled" => Live chat is disabled
-    // "membersOnly" => No permission (members-only)
-    // "private" => No permission (private video)
-    // "unavailable" => Deleted OR wrong video id
-    // "unarchived" => Live stream recording is not available
-    // "denied" => Access denied (429)
-    // "invalid" => Invalid request
-    return;
-  }
+	// Handle errors
+	if (err instanceof MasterchatError) {
+		console.log(err.code);
+		// "disabled" => Live chat is disabled
+		// "membersOnly" => No permission (members-only)
+		// "private" => No permission (private video)
+		// "unavailable" => Deleted OR wrong video id
+		// "unarchived" => Live stream recording is not available
+		// "denied" => Access denied (429)
+		// "invalid" => Invalid request
+		return;
+	}
 
-  throw err;
+	throw err;
 }
 
-console.log("Live stream has ended");
+console.log('Live stream has ended');
 ```
 
 ### Save replay chats in .jsonl
 
 ```js
-import { Masterchat } from "masterchat";
-import { appendFile, writeFile, readFile } from "node:fs/promises";
+import { Masterchat } from 'masterchat';
+import { appendFile, writeFile, readFile } from 'node:fs/promises';
 
-const mc = await Masterchat.init("<videoId>");
+const mc = await Masterchat.init('<videoId>');
 
 await mc
-  .iter()
-  .filter((action) => action.type === "addChatItemAction") // only chat events
-  .map((chat) => JSON.stringify(chat) + "\n") // convert to JSONL
-  .forEach((jsonl) => appendFile("./chats.jsonl", jsonl)) // append to the file
+	.iter()
+	.filter((action) => action.type === 'addChatItemAction') // only chat events
+	.map((chat) => JSON.stringify(chat) + '\n') // convert to JSONL
+	.forEach((jsonl) => appendFile('./chats.jsonl', jsonl)); // append to the file
 ```
 
 ### Chat moderation bot
 
 ```js
-import { Masterchat, stringify } from "masterchat";
-import { isSpam } from "spamreaper";
+import { Masterchat, stringify } from 'masterchat';
+import { isSpam } from 'spamreaper';
 
 // `credentials` is an object containing YouTube session cookie or a base64-encoded JSON string of them
 const credentials = {
-  SAPISID: "<value>",
-  APISID: "<value>",
-  HSID: "<value>",
-  SID: "<value>",
-  SSID: "<value>",
+	SAPISID: '<value>',
+	APISID: '<value>',
+	HSID: '<value>',
+	SID: '<value>',
+	SSID: '<value>'
 };
 
-const mc = await Masterchat.init("<videoId>", { credentials });
+const mc = await Masterchat.init('<videoId>', { credentials });
 
-const iter = mc.iter().filter((action) => action.type === "addChatItemAction");
+const iter = mc.iter().filter((action) => action.type === 'addChatItemAction');
 
 for await (const chat of iter) {
-  const message = stringify(chat.message, {
-    // omit emojis
-    emojiHandler: (emoji) => "",
-  });
+	const message = stringify(chat.message, {
+		// omit emojis
+		emojiHandler: (emoji) => ''
+	});
 
-  if (isSpam(message) || /UGLY/.test(message)) {
-    // delete chat
-    // if flagged as spam by Spamreaper
-    // or contains "UGLY"
-    await mc.remove(action.id);
-  }
+	if (isSpam(message) || /UGLY/.test(message)) {
+		// delete chat
+		// if flagged as spam by Spamreaper
+		// or contains "UGLY"
+		await mc.remove(action.id);
+	}
 }
 ```
 
 ### Get video comments (≠ live chats)
 
 ```js
-import { Masterchat } from "masterchat";
+import { Masterchat } from 'masterchat';
 
-const mc = new Masterchat("<videoId>", "");
+const mc = new Masterchat('<videoId>', '');
 
 // Iterate over all comments
 let res = await mc.getComments({ top: true });
 while (true) {
-  console.log(res.comments);
+	console.log(res.comments);
 
-  if (!res.next) break;
-  res = await res.next();
+	if (!res.next) break;
+	res = await res.next();
 }
 
 // Get comment by id
-const comment = await mc.getComment("<commentId>");
+const comment = await mc.getComment('<commentId>');
 console.log(comment);
 ```
 
 ### Get transcript
 
 ```js
-import { Masterchat, stringify } from "masterchat";
+import { Masterchat, stringify } from 'masterchat';
 
-const mc = new Masterchat("<videoId>", "");
+const mc = new Masterchat('<videoId>', '');
 
 const transcript = await mc.getTranscript();
 
 for (const item of transcript) {
-  console.log(item.startMs, stringify(item.snippet));
+	console.log(item.startMs, stringify(item.snippet));
 }
 ```
 
@@ -192,7 +190,7 @@ for (const item of transcript) {
 To skip loading watch page, use `new Masterchat(videoId: string, channelId: string, { mode?: "live" | "replay" })`:
 
 ```js
-const live = new Masterchat(videoId, channelId, { mode: "live" });
+const live = new Masterchat(videoId, channelId, { mode: 'live' });
 ```
 
 instead of:
@@ -227,7 +225,7 @@ eyJTSUQiOiJL[omit]iJBSEwx
 Set credentials.
 
 ```js
-const credentials = "eyJTSUQiOiJL[omit]iJBSEwx";
+const credentials = 'eyJTSUQiOiJL[omit]iJBSEwx';
 
 const client = await Masterchat.init(id, { credentials });
 ```
@@ -235,15 +233,15 @@ const client = await Masterchat.init(id, { credentials });
 ### Custom axios client
 
 ```js
-import axios from "axios";
-import https from "https";
-import { Masterchat } from "masterchat";
+import axios from 'axios';
+import https from 'https';
+import { Masterchat } from 'masterchat';
 
 const axiosInstance = axios.create({
-  timeout: 4000,
-  httpsAgent: new https.Agent({ keepAlive: true }),
+	timeout: 4000,
+	httpsAgent: new https.Agent({ keepAlive: true })
 });
-const mc = await Masterchat.init("<videoId>", { axiosInstance });
+const mc = await Masterchat.init('<videoId>', { axiosInstance });
 ```
 
 ## Reference

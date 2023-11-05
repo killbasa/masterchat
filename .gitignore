@@ -1,12 +1,11 @@
 *.code-workspace
-.vscode
 .envrc
 *.jsonl
 *.schema.json
 .venv
 TODO.md
 
-/lib
+dist/
 __nock-fixtures__
 
 # Created by https://www.toptal.com/developers/gitignore/api/node

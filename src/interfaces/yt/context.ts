@@ -1,1555 +1,1263 @@
-import {
-  UIActions,
-  YTApiEndpointMetadataContainer,
-  YTClientMessages,
-  YTIcon,
-  YTIgnoreWebCommandMetadata,
-  YTOverflowMenu,
-  YTRun,
-  YTRunContainer,
-  YTSimpleTextContainer,
-  YTText,
-  YTThumbnailList,
-  YTWebPageType,
-} from "./chat";
+import { YTWebPageType } from './chat';
+import type {
+	UIActions,
+	YTApiEndpointMetadataContainer,
+	YTIgnoreWebCommandMetadata,
+	YTRun,
+	YTRunContainer,
+	YTSimpleTextContainer,
+	YTText
+} from './chat';
 
-export interface YTPlayabilityStatus {
-  status:
-    | "ERROR" // -> Deleted OR mistyped video id
-    | "LOGIN_REQUIRED" // -> Privated
-    | "UNPLAYABLE" // -> Unarchived OR members-only stream
-    | "LIVE_STREAM_OFFLINE" // -> Offline (pre-stream OR abandoned stream)
-    | "OK"; // -> Live chat OR replay chat is available
-  contextParams: string;
-  // if not OK
-  reason?: string;
-  errorScreen?: {
-    playerErrorMessageRenderer?: {
-      reason: YTSimpleTextContainer;
-      thumbnail: YTThumbnailList;
-      icon: YTIcon;
-    };
-    // if UNPLAYABLE (members-only)
-    playerLegacyDesktopYpcOfferRenderer?: {
-      itemTitle: "Members-only content";
-      itemThumbnail: string;
-      offerDescription: string;
-      offerId: "sponsors_only_video";
-    };
-  };
-  // if UNPLAYABLE (members-only)
-  skip?: {
-    playabilityErrorSkipConfig: {
-      skipOnPlayabilityError: boolean;
-    };
-  };
-  // if OK
-  miniplayer?: {
-    miniplayerRenderer: {
-      playbackMode: "PLAYBACK_MODE_ALLOW"; // TODO: find others
-    };
-  };
-  // if LIVE_STREAM_OFFLINE
-  liveStreamability?: {
-    liveStreamabilityRenderer: {
-      videoId: string;
-      offlineSlate: {
-        liveStreamOfflineSlateRenderer: {
-          scheduledStartTime: string;
-          mainText: YTRunContainer;
-          subtitleText: YTSimpleTextContainer;
-          thumbnail: YTThumbnailList;
-          pollDelayMs: string;
-        };
-      };
-    };
-  };
-  // if OK or LIVE_STREAM_OFFLINE
-  playableInEmbed?: boolean;
-}
+export type YTResponseContext = {
+	serviceTrackingParams: YTServiceTrackingParam[];
 
-export interface YTContextConfig {
-  transparentBackground: boolean;
-  useFastSizingOnWatchDefault: boolean;
-  showMiniplayerButton: boolean;
-  externalFullscreen: boolean;
-  showMiniplayerUiWhenMinimized: boolean;
-  rootElementId: string;
-  jsUrl: string;
-  cssUrl: string;
-  contextId: string;
-  eventLabel: string;
-  contentRegion: string;
-  hl: string;
-  hostLanguage: string;
-  playerStyle: string;
-  innertubeApiKey: string;
-  innertubeApiVersion: string;
-  innertubeContextClientVersion: string;
-  device: YTDevice;
-  serializedExperimentIds: string;
-  serializedExperimentFlags: string;
-  canaryState: string;
-  enableCsiLogging: boolean;
-  csiPageType: string;
-}
+	webResponseContextExtensionData: WebResponseContextExtensionData;
+};
 
-export interface YTDevice {
-  brand: string;
-  model: string;
-  browser: string;
-  browserVersion: string;
-  os: string;
-  osVersion: string;
-  platform: string;
-  interfaceName: string;
-  interfaceVersion: string;
-}
+export type WebResponseContextExtensionData = {
+	ytConfigData: YTConfigData;
 
-export interface YTInitialData {
-  responseContext: YTResponseContext;
-  contents?: YTContents;
-  currentVideoEndpoint: CurrentVideoEndpointClass;
-  trackingParams: string;
-  playerOverlays: PlayerOverlays;
-  overlay: Overlay;
-  onResponseReceivedEndpoints: OnResponseReceivedEndpoint[];
-  topbar: Topbar;
-  frameworkUpdates: FrameworkUpdates;
-  webWatchNextResponseExtensionData: YTWebWatchNextResponseExtensionData;
-}
+	webPrefetchData: WebPrefetchData;
 
-export interface YTContents {
-  twoColumnWatchNextResults?: YTTwoColumnWatchNextResults;
-}
+	hasDecorated: boolean;
+};
 
-export interface YTTwoColumnWatchNextResults {
-  results: TwoColumnWatchNextResultsResults;
-  secondaryResults: YTTwoColumnWatchNextResultsSecondaryResults;
-  autoplay: YTTwoColumnWatchNextResultsAutoplay;
-  conversationBar?: YTConversationBar;
-}
+export type WebPrefetchData = {
+	navigationEndpoints: YTNavigationEndpoint[];
+};
 
-export interface YTTwoColumnWatchNextResultsAutoplay {
-  autoplay: YTAutoplayAutoplay;
-}
+export type YTNavigationEndpoint = {
+	clickTrackingParams: string;
 
-export interface YTAutoplayAutoplay {
-  sets: YTSet[];
-  countDownSecs: number;
-  trackingParams: string;
-}
+	commandMetadata: YTAutoplayVideoCommandMetadata;
 
-export interface YTSet {
-  mode: string;
-  autoplayVideo: YTNavigationEndpoint;
-}
+	watchEndpoint: YTAutoplayVideoWatchEndpoint;
+};
 
-export interface YTNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTAutoplayVideoCommandMetadata;
-  watchEndpoint: YTAutoplayVideoWatchEndpoint;
-}
+export type YTAutoplayVideoWatchEndpoint = {
+	videoId: string;
 
-export interface YTAutoplayVideoCommandMetadata {
-  webCommandMetadata: YTPurpleWebCommandMetadata;
-}
+	params: string;
 
-export interface YTPurpleWebCommandMetadata {
-  url: string;
-  webPageType: YTWebPageType;
-  rootVe: number;
-}
+	playerParams: string;
 
-export interface YTAutoplayVideoWatchEndpoint {
-  videoId: string;
-  params: string;
-  playerParams: string;
-  watchEndpointSupportedPrefetchConfig: YTWatchEndpointSupportedPrefetchConfig;
-}
+	watchEndpointSupportedPrefetchConfig: YTWatchEndpointSupportedPrefetchConfig;
+};
 
-export interface YTWatchEndpointSupportedPrefetchConfig {
-  prefetchHintConfig: YTPrefetchHintConfig;
-}
+export type YTWatchEndpointSupportedPrefetchConfig = {
+	prefetchHintConfig: YTPrefetchHintConfig;
+};
 
-export interface YTPrefetchHintConfig {
-  prefetchPriority: number;
-  countdownUiRelativeSecondsPrefetchCondition: number;
-}
+export type YTPrefetchHintConfig = {
+	prefetchPriority: number;
 
-export interface YTConversationBar {
-  liveChatRenderer: YTLiveChatRenderer;
-}
+	countdownUiRelativeSecondsPrefetchCondition: number;
+};
 
-export interface YTLiveChatRenderer {
-  continuations: YTReloadContinuation[];
-  header: YTHeader;
-  trackingParams: string;
-  clientMessages: YTClientMessages;
-  initialDisplayState: string;
-  showHideButton: YTShowHideButton;
-}
+export type YTAutoplayVideoCommandMetadata = {
+	webCommandMetadata: YTPurpleWebCommandMetadata;
+};
 
-export interface YTReloadContinuation {
-  reloadContinuationData: YTReloadContinuationData;
-}
+export type YTPurpleWebCommandMetadata = {
+	url: string;
+	webPageType: YTWebPageType;
+	rootVe: number;
+};
 
-export interface YTReloadContinuationData {
-  continuation: string;
-  clickTrackingParams: string;
-}
+export type YTReloadContinuation = {
+	reloadContinuationData: YTReloadContinuationData;
+};
 
-export interface YTHeader {
-  liveChatHeaderRenderer: YTLiveChatHeaderRenderer;
-}
+export type YTReloadContinuationData = {
+	continuation: string;
+	clickTrackingParams: string;
+};
 
-export interface YTLiveChatHeaderRenderer {
-  overflowMenu: YTOverflowMenu;
-  collapseButton: YTDismissButtonClass;
-  viewSelector: ViewSelector;
-}
+export type YTDismissButtonClass = {
+	buttonRenderer: YTCollapseButtonButtonRenderer;
+};
 
-export interface YTDismissButtonClass {
-  buttonRenderer: YTCollapseButtonButtonRenderer;
-}
+export type YTCollapseButtonButtonRenderer = {
+	style: string;
+	size: string;
+	isDisabled: boolean;
+	accessibility?: YTAccessibilityLabel;
+	trackingParams: string;
+	text?: YTRunContainer;
+};
 
-export interface YTCollapseButtonButtonRenderer {
-  style: string;
-  size: string;
-  isDisabled: boolean;
-  accessibility?: YTAccessibilityLabel;
-  trackingParams: string;
-  text?: YTRunContainer;
-}
+export type YTAccessibilityData = {
+	accessibilityData: YTAccessibilityLabel;
+};
 
-export interface YTAccessibilityData {
-  accessibilityData: YTAccessibilityLabel;
-}
+export type YTAccessibilityLabel = {
+	label: string;
+};
 
-export interface YTAccessibilityLabel {
-  label: string;
-}
+export type YTMenuItemRenderer = {
+	text: YTRunContainer;
+	icon: Icon;
+	navigationEndpoint?: MenuNavigationItemRendererNavigationEndpoint;
+	trackingParams: string;
+	serviceEndpoint?: MenuNavigationItemRendererServiceEndpoint;
+};
 
-export interface YTPurpleItem {
-  menuServiceItemRenderer?: YTMenuItemRenderer;
-  menuNavigationItemRenderer?: YTMenuItemRenderer;
-}
+export type Icon = {
+	iconType: string;
+};
 
-export interface YTMenuItemRenderer {
-  text: YTRunContainer;
-  icon: Icon;
-  navigationEndpoint?: MenuNavigationItemRendererNavigationEndpoint;
-  trackingParams: string;
-  serviceEndpoint?: MenuNavigationItemRendererServiceEndpoint;
-}
+export type MenuNavigationItemRendererNavigationEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: DefaultNavigationEndpointCommandMetadata;
+	userFeedbackEndpoint: UserFeedbackEndpoint;
+};
 
-export interface Icon {
-  iconType: string;
-}
+export type DefaultNavigationEndpointCommandMetadata = {
+	webCommandMetadata: YTIgnoreWebCommandMetadata;
+};
 
-export interface MenuNavigationItemRendererNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: DefaultNavigationEndpointCommandMetadata;
-  userFeedbackEndpoint: UserFeedbackEndpoint;
-}
+export type UserFeedbackEndpoint = {
+	hack: boolean;
+	bucketIdentifier: string;
+};
 
-export interface DefaultNavigationEndpointCommandMetadata {
-  webCommandMetadata: YTIgnoreWebCommandMetadata;
-}
+export type MenuNavigationItemRendererServiceEndpoint = {
+	clickTrackingParams: string;
+	showLiveChatParticipantsEndpoint?: ShowLiveChatParticipantsEndpointClass;
+	popoutLiveChatEndpoint?: PopoutLiveChatEndpoint;
+	toggleLiveChatTimestampsEndpoint?: ShowLiveChatParticipantsEndpointClass;
+	commandMetadata?: OnResponseReceivedEndpointCommandMetadata;
+	signalServiceEndpoint?: ServiceEndpointSignalServiceEndpoint;
+};
 
-export interface UserFeedbackEndpoint {
-  hack: boolean;
-  bucketIdentifier: string;
-}
+export type OnResponseReceivedEndpointCommandMetadata = {
+	webCommandMetadata: TentacledWebCommandMetadata;
+};
 
-export interface MenuNavigationItemRendererServiceEndpoint {
-  clickTrackingParams: string;
-  showLiveChatParticipantsEndpoint?: ShowLiveChatParticipantsEndpointClass;
-  popoutLiveChatEndpoint?: PopoutLiveChatEndpoint;
-  toggleLiveChatTimestampsEndpoint?: ShowLiveChatParticipantsEndpointClass;
-  commandMetadata?: OnResponseReceivedEndpointCommandMetadata;
-  signalServiceEndpoint?: ServiceEndpointSignalServiceEndpoint;
-}
+export type TentacledWebCommandMetadata = {
+	sendPost: boolean;
+};
 
-export interface OnResponseReceivedEndpointCommandMetadata {
-  webCommandMetadata: TentacledWebCommandMetadata;
-}
+export type PopoutLiveChatEndpoint = {
+	url: string;
+};
 
-export interface TentacledWebCommandMetadata {
-  sendPost: boolean;
-}
+export type ShowLiveChatParticipantsEndpointClass = {
+	hack: boolean;
+};
 
-export interface PopoutLiveChatEndpoint {
-  url: string;
-}
+export type ServiceEndpointSignalServiceEndpoint = {
+	signal: Signal;
+	actions: PurpleAction[];
+};
 
-export interface ShowLiveChatParticipantsEndpointClass {
-  hack: boolean;
-}
+export type PurpleAction = {
+	clickTrackingParams: string;
+	addToPlaylistCommand?: AddToPlaylistCommand;
+	openPopupAction?: PurpleOpenPopupAction;
+};
 
-export interface ServiceEndpointSignalServiceEndpoint {
-  signal: Signal;
-  actions: PurpleAction[];
-}
-
-export interface PurpleAction {
-  clickTrackingParams: string;
-  addToPlaylistCommand?: AddToPlaylistCommand;
-  openPopupAction?: PurpleOpenPopupAction;
-}
-
-export interface AddToPlaylistCommand {
-  openMiniplayer: boolean;
-  openListPanel: boolean;
-  videoId: string;
-  listType: ListType;
-  onCreateListCommand: YTOnCreateListCommand;
-  videoIds: string[];
-}
+export type AddToPlaylistCommand = {
+	openMiniplayer: boolean;
+	openListPanel: boolean;
+	videoId: string;
+	listType: ListType;
+	onCreateListCommand: YTOnCreateListCommand;
+	videoIds: string[];
+};
 
 export enum ListType {
-  PlaylistEditListTypeQueue = "PLAYLIST_EDIT_LIST_TYPE_QUEUE",
+	PlaylistEditListTypeQueue = 'PLAYLIST_EDIT_LIST_TYPE_QUEUE'
 }
 
-export interface YTOnCreateListCommand {
-  clickTrackingParams: string;
-  commandMetadata: YTApiEndpointMetadataContainer;
-  createPlaylistServiceEndpoint: YTCreatePlaylistServiceEndpoint;
-}
+export type YTOnCreateListCommand = {
+	clickTrackingParams: string;
+	commandMetadata: YTApiEndpointMetadataContainer;
+	createPlaylistServiceEndpoint: YTCreatePlaylistServiceEndpoint;
+};
 
-export interface YTCreatePlaylistServiceEndpoint {
-  videoIds: string[];
-  params: string;
-}
+export type YTCreatePlaylistServiceEndpoint = {
+	videoIds: string[];
+	params: string;
+};
 
-export interface PurpleOpenPopupAction {
-  popup: PurplePopup;
-  popupType: PopupType;
-}
+export type PurpleOpenPopupAction = {
+	popup: PurplePopup;
+	popupType: PopupType;
+};
 
-export interface PurplePopup {
-  notificationActionRenderer: NotificationActionRenderer;
-}
+export type PurplePopup = {
+	notificationActionRenderer: NotificationActionRenderer;
+};
 
-export interface NotificationActionRenderer {
-  responseText: YTSimpleTextContainer;
-  trackingParams: string;
-}
+export type NotificationActionRenderer = {
+	responseText: YTSimpleTextContainer;
+	trackingParams: string;
+};
 
-export interface ShortViewCountText {
-  simpleText?: string;
-  runs?: YTRun[];
-}
+export type ShortViewCountText = {
+	simpleText?: string;
+	runs?: YTRun[];
+};
 
 export enum PopupType {
-  Toast = "TOAST",
+	Toast = 'TOAST'
 }
 
 export enum Signal {
-  ClientSignal = "CLIENT_SIGNAL",
+	ClientSignal = 'CLIENT_SIGNAL'
 }
 
-export interface ViewSelector {
-  sortFilterSubMenuRenderer: SortFilterSubMenuRenderer;
-}
+export type ViewSelector = {
+	sortFilterSubMenuRenderer: SortFilterSubMenuRenderer;
+};
 
-export interface SortFilterSubMenuRenderer {
-  subMenuItems: SubMenuItem[];
-  accessibility: YTAccessibilityData;
-  trackingParams: string;
-}
+export type SortFilterSubMenuRenderer = {
+	subMenuItems: SubMenuItem[];
+	accessibility: YTAccessibilityData;
+	trackingParams: string;
+};
 
-export interface SubMenuItem {
-  title: string;
-  selected: boolean;
-  continuation: YTReloadContinuation;
-  accessibility: YTAccessibilityData;
-  subtitle: string;
-}
+export type SubMenuItem = {
+	title: string;
+	selected: boolean;
+	continuation: YTReloadContinuation;
+	accessibility: YTAccessibilityData;
+	subtitle: string;
+};
 
-export interface YTShowHideButton {
-  toggleButtonRenderer: ShowHideButtonToggleButtonRenderer;
-}
+export type YTShowHideButton = {
+	toggleButtonRenderer: ShowHideButtonToggleButtonRenderer;
+};
 
-export interface ShowHideButtonToggleButtonRenderer {
-  isToggled: boolean;
-  isDisabled: boolean;
-  defaultText: YTSimpleTextContainer;
-  toggledText: YTSimpleTextContainer;
-  trackingParams: string;
-}
+export type ShowHideButtonToggleButtonRenderer = {
+	isToggled: boolean;
+	isDisabled: boolean;
+	defaultText: YTSimpleTextContainer;
+	toggledText: YTSimpleTextContainer;
+	trackingParams: string;
+};
 
-export interface TwoColumnWatchNextResultsResults {
-  results: ResultsResults;
-}
+export type SuperTitleLink = {
+	runs: SuperTitleLinkRun[];
+};
 
-export interface ResultsResults {
-  contents: ResultsContent[];
-  trackingParams: string;
-}
+export type SuperTitleLinkRun = {
+	text: string;
+	navigationEndpoint?: PurpleNavigationEndpoint;
+	loggingDirectives?: any;
+};
 
-export interface ResultsContent {
-  videoPrimaryInfoRenderer: VideoPrimaryInfoRenderer;
-  videoSecondaryInfoRenderer: VideoSecondaryInfoRenderer;
-}
+export type PurpleNavigationEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: YTAutoplayVideoCommandMetadata;
+	browseEndpoint?: PurpleBrowseEndpoint;
+	urlEndpoint?: PurpleURLEndpoint;
+};
 
-export interface VideoPrimaryInfoRenderer {
-  title: YTRunContainer;
-  viewCount?: ViewCount;
-  videoActions: VideoActions;
-  trackingParams: string;
-  updatedMetadataEndpoint: UpdatedMetadataEndpoint;
-  sentimentBar: SentimentBar;
-  badges?: MetadataBadgeRendererContainer[];
-  superTitleLink: SuperTitleLink;
-  dateText: YTSimpleTextContainer;
-}
+export type PurpleBrowseEndpoint = {
+	browseId: string;
+	params: string;
+};
 
-export interface SentimentBar {
-  sentimentBarRenderer: SentimentBarRenderer;
-}
+export type PurpleURLEndpoint = {
+	url: string;
+	target?: string;
+	nofollow: boolean;
+};
 
-export interface SentimentBarRenderer {
-  percentIfIndifferent: number;
-  percentIfLiked: number;
-  percentIfDisliked: number;
-  likeStatus: string;
-  tooltip: string;
-}
+export type UpdatedMetadataEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: YTApiEndpointMetadataContainer;
+	updatedMetadataEndpoint: WatchEndpointClass;
+};
 
-export interface SuperTitleLink {
-  runs: SuperTitleLinkRun[];
-}
+export type WatchEndpointClass = {
+	videoId: string;
+};
 
-export interface SuperTitleLinkRun {
-  text: string;
-  navigationEndpoint?: PurpleNavigationEndpoint;
-  loggingDirectives?: any;
-}
+export type CurrentVideoEndpointClass = {
+	clickTrackingParams: string;
+	commandMetadata: YTAutoplayVideoCommandMetadata;
+	watchEndpoint: WatchEndpointClass;
+};
 
-export interface PurpleNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTAutoplayVideoCommandMetadata;
-  browseEndpoint?: PurpleBrowseEndpoint;
-  urlEndpoint?: PurpleURLEndpoint;
-}
+export type ButtonRendererServiceEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: YTApiEndpointMetadataContainer;
+	shareEntityServiceEndpoint: ShareEntityServiceEndpoint;
+};
 
-export interface PurpleBrowseEndpoint {
-  browseId: string;
-  params: string;
-}
+export type ShareEntityServiceEndpoint = {
+	serializedShareEntity: string;
+	commands: Command[];
+};
 
-export interface PurpleURLEndpoint {
-  url: string;
-  target?: string;
-  nofollow: boolean;
-}
+export type Command = {
+	clickTrackingParams: string;
+	openPopupAction: CommandOpenPopupAction;
+};
 
-export interface UpdatedMetadataEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTApiEndpointMetadataContainer;
-  updatedMetadataEndpoint: WatchEndpointClass;
-}
+export type CommandOpenPopupAction = {
+	popup: FluffyPopup;
+	popupType: string;
+	beReused: boolean;
+};
 
-export interface WatchEndpointClass {
-  videoId: string;
-}
+export type FluffyPopup = {
+	unifiedSharePanelRenderer: UnifiedSharePanelRenderer;
+};
 
-export interface VideoActions {
-  menuRenderer: VideoActionsMenuRenderer;
-}
+export type UnifiedSharePanelRenderer = {
+	trackingParams: string;
+	showLoadingSpinner: boolean;
+};
 
-export interface VideoActionsMenuRenderer {
-  trackingParams: string;
-  topLevelButtons: TopLevelButton[];
-}
+export type TopLevelButtonToggleButtonRenderer = {
+	style: StyleClass;
+	isToggled: boolean;
+	isDisabled: boolean;
+	defaultIcon: Icon;
+	defaultText: YTSimpleTextContainer;
+	toggledText: YTSimpleTextContainer;
+	accessibility: YTAccessibilityLabel;
+	trackingParams: string;
+	defaultTooltip: string;
+	toggledTooltip: string;
+	toggledStyle: StyleClass;
+	defaultNavigationEndpoint: DefaultNavigationEndpoint;
+	accessibilityData: YTAccessibilityData;
+	toggleButtonSupportedData: ToggleButtonSupportedData;
+	targetId: string;
+};
 
-export interface TopLevelButton {
-  toggleButtonRenderer?: TopLevelButtonToggleButtonRenderer;
-  buttonRenderer?: TopLevelButtonButtonRenderer;
-}
+export type DefaultNavigationEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: DefaultNavigationEndpointCommandMetadata;
+	modalEndpoint: DefaultNavigationEndpointModalEndpoint;
+};
 
-export interface TopLevelButtonButtonRenderer {
-  style: string;
-  size: string;
-  isDisabled: boolean;
-  text?: YTRunContainer;
-  serviceEndpoint?: ButtonRendererServiceEndpoint;
-  icon: Icon;
-  accessibility: YTAccessibilityLabel;
-  tooltip: string;
-  trackingParams: string;
-  navigationEndpoint?: FluffyNavigationEndpoint;
-  accessibilityData?: YTAccessibilityData;
-}
+export type DefaultNavigationEndpointModalEndpoint = {
+	modal: FluffyModal;
+};
 
-export interface FluffyNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: DefaultNavigationEndpointCommandMetadata;
-  modalEndpoint: PurpleModalEndpoint;
-}
+export type FluffyModal = {
+	modalWithTitleAndButtonRenderer: FluffyModalWithTitleAndButtonRenderer;
+};
 
-export interface PurpleModalEndpoint {
-  modal: PurpleModal;
-}
+export type FluffyModalWithTitleAndButtonRenderer = {
+	title: YTSimpleTextContainer;
+	content: YTSimpleTextContainer;
+	button: FluffyButton;
+};
 
-export interface PurpleModal {
-  modalWithTitleAndButtonRenderer: PurpleModalWithTitleAndButtonRenderer;
-}
+export type FluffyButton = {
+	buttonRenderer: FluffyButtonRenderer;
+};
 
-export interface PurpleModalWithTitleAndButtonRenderer {
-  title: YTSimpleTextContainer;
-  content: ShortViewCountText;
-  button: PurpleButton;
-}
+export type FluffyButtonRenderer = {
+	style: string;
+	size: string;
+	isDisabled: boolean;
+	text: YTSimpleTextContainer;
+	navigationEndpoint: StickyNavigationEndpoint;
+	trackingParams: string;
+};
 
-export interface PurpleButton {
-  buttonRenderer: PurpleButtonRenderer;
-}
+export type StickyNavigationEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: YTAutoplayVideoCommandMetadata;
+	signInEndpoint: FluffySignInEndpoint;
+};
 
-export interface PurpleButtonRenderer {
-  style: string;
-  size: string;
-  isDisabled: boolean;
-  text: YTSimpleTextContainer;
-  navigationEndpoint: TentacledNavigationEndpoint;
-  trackingParams: string;
-}
+export type FluffySignInEndpoint = {
+	nextEndpoint: CurrentVideoEndpointClass;
+	idamTag: string;
+};
 
-export interface TentacledNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTAutoplayVideoCommandMetadata;
-  signInEndpoint: PurpleSignInEndpoint;
-}
-
-export interface PurpleSignInEndpoint {
-  nextEndpoint?: CurrentVideoEndpointClass;
-  idamTag?: string;
-  hack?: boolean;
-}
-
-export interface CurrentVideoEndpointClass {
-  clickTrackingParams: string;
-  commandMetadata: YTAutoplayVideoCommandMetadata;
-  watchEndpoint: WatchEndpointClass;
-}
-
-export interface ButtonRendererServiceEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTApiEndpointMetadataContainer;
-  shareEntityServiceEndpoint: ShareEntityServiceEndpoint;
-}
-
-export interface ShareEntityServiceEndpoint {
-  serializedShareEntity: string;
-  commands: Command[];
-}
-
-export interface Command {
-  clickTrackingParams: string;
-  openPopupAction: CommandOpenPopupAction;
-}
-
-export interface CommandOpenPopupAction {
-  popup: FluffyPopup;
-  popupType: string;
-  beReused: boolean;
-}
-
-export interface FluffyPopup {
-  unifiedSharePanelRenderer: UnifiedSharePanelRenderer;
-}
-
-export interface UnifiedSharePanelRenderer {
-  trackingParams: string;
-  showLoadingSpinner: boolean;
-}
-
-export interface TopLevelButtonToggleButtonRenderer {
-  style: StyleClass;
-  isToggled: boolean;
-  isDisabled: boolean;
-  defaultIcon: Icon;
-  defaultText: YTSimpleTextContainer;
-  toggledText: YTSimpleTextContainer;
-  accessibility: YTAccessibilityLabel;
-  trackingParams: string;
-  defaultTooltip: string;
-  toggledTooltip: string;
-  toggledStyle: StyleClass;
-  defaultNavigationEndpoint: DefaultNavigationEndpoint;
-  accessibilityData: YTAccessibilityData;
-  toggleButtonSupportedData: ToggleButtonSupportedData;
-  targetId: string;
-}
-
-export interface DefaultNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: DefaultNavigationEndpointCommandMetadata;
-  modalEndpoint: DefaultNavigationEndpointModalEndpoint;
-}
-
-export interface DefaultNavigationEndpointModalEndpoint {
-  modal: FluffyModal;
-}
-
-export interface FluffyModal {
-  modalWithTitleAndButtonRenderer: FluffyModalWithTitleAndButtonRenderer;
-}
-
-export interface FluffyModalWithTitleAndButtonRenderer {
-  title: YTSimpleTextContainer;
-  content: YTSimpleTextContainer;
-  button: FluffyButton;
-}
-
-export interface FluffyButton {
-  buttonRenderer: FluffyButtonRenderer;
-}
-
-export interface FluffyButtonRenderer {
-  style: string;
-  size: string;
-  isDisabled: boolean;
-  text: YTSimpleTextContainer;
-  navigationEndpoint: StickyNavigationEndpoint;
-  trackingParams: string;
-}
-
-export interface StickyNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTAutoplayVideoCommandMetadata;
-  signInEndpoint: FluffySignInEndpoint;
-}
-
-export interface FluffySignInEndpoint {
-  nextEndpoint: CurrentVideoEndpointClass;
-  idamTag: string;
-}
-
-export interface StyleClass {
-  styleType: StyleTypeEnum;
-}
+export type StyleClass = {
+	styleType: StyleTypeEnum;
+};
 
 export enum StyleTypeEnum {
-  StyleDefaultActive = "STYLE_DEFAULT_ACTIVE",
-  StyleText = "STYLE_TEXT",
+	StyleDefaultActive = 'STYLE_DEFAULT_ACTIVE',
+	StyleText = 'STYLE_TEXT'
 }
 
-export interface ToggleButtonSupportedData {
-  toggleButtonIdData: ToggleButtonIDData;
-}
+export type ToggleButtonSupportedData = {
+	toggleButtonIdData: ToggleButtonIDData;
+};
 
-export interface ToggleButtonIDData {
-  id: string;
-}
+export type ToggleButtonIDData = {
+	id: string;
+};
 
-export interface ViewCount {
-  videoViewCountRenderer: VideoViewCountRenderer;
-}
+export type MetadataRowContainerRenderer = {
+	rows: Row[];
+	collapsedItemCount: number;
+	trackingParams: string;
+};
 
-export interface VideoViewCountRenderer {
-  viewCount: YTText;
-  shortViewCount?: YTText;
-  isLive?: boolean;
-}
+export type Row = {
+	richMetadataRowRenderer: RichMetadataRowRenderer;
+};
 
-export interface VideoSecondaryInfoRenderer {
-  owner: Owner;
-  description: SuperTitleLink;
-  subscribeButton: SubscribeButton;
-  metadataRowContainer: MetadataRowContainer;
-  showMoreText: YTRunContainer;
-  showLessText: YTRunContainer;
-  trackingParams: string;
-  defaultExpanded: boolean;
-  descriptionCollapsedLines: number;
-}
+export type RichMetadataRowRenderer = {
+	contents: RichMetadataRowRendererContent[];
+	trackingParams: string;
+};
 
-export interface MetadataRowContainer {
-  metadataRowContainerRenderer: MetadataRowContainerRenderer;
-}
+export type RichMetadataRowRendererContent = {
+	richMetadataRenderer: RichMetadataRenderer;
+};
 
-export interface MetadataRowContainerRenderer {
-  rows: Row[];
-  collapsedItemCount: number;
-  trackingParams: string;
-}
+export type RichMetadataRenderer = {
+	style: string;
+	thumbnail: Background;
+	title: YTSimpleTextContainer;
+	subtitle?: YTSimpleTextContainer;
+	callToAction: YTSimpleTextContainer;
+	callToActionIcon: Icon;
+	endpoint: YTBrowseEndpointContainer;
+	trackingParams: string;
+};
 
-export interface Row {
-  richMetadataRowRenderer: RichMetadataRowRenderer;
-}
+export type YTBrowseEndpointContainer = {
+	browseEndpoint: YTBrowseEndpoint;
+	commandMetadata: YTAutoplayVideoCommandMetadata;
+	clickTrackingParams: string;
+};
 
-export interface RichMetadataRowRenderer {
-  contents: RichMetadataRowRendererContent[];
-  trackingParams: string;
-}
+export type YTBrowseEndpoint = {
+	browseId: string;
+};
 
-export interface RichMetadataRowRendererContent {
-  richMetadataRenderer: RichMetadataRenderer;
-}
+export type Background = {
+	thumbnails: Thumbnail[];
+};
 
-export interface RichMetadataRenderer {
-  style: string;
-  thumbnail: Background;
-  title: YTSimpleTextContainer;
-  subtitle?: YTSimpleTextContainer;
-  callToAction: YTSimpleTextContainer;
-  callToActionIcon: Icon;
-  endpoint: YTBrowseEndpointContainer;
-  trackingParams: string;
-}
+export type Thumbnail = {
+	url: string;
+	width: number;
+	height: number;
+};
 
-export interface YTBrowseEndpointContainer {
-  browseEndpoint: YTBrowseEndpoint;
-  commandMetadata: YTAutoplayVideoCommandMetadata;
-  clickTrackingParams: string;
-}
+export type Owner = {
+	videoOwnerRenderer: VideoOwnerRenderer;
+};
 
-export interface YTBrowseEndpoint {
-  browseId: string;
-}
+export type VideoOwnerRenderer = {
+	thumbnail: Background;
+	title: Byline;
+	navigationEndpoint: VideoOwnerRendererNavigationEndpoint;
+	subscriberCountText: YTRunContainer;
+	trackingParams: string;
+	badges: MetadataBadgeRendererContainer[];
+	membershipButton: MembershipButton;
+};
 
-export interface Background {
-  thumbnails: Thumbnail[];
-}
+export type MetadataBadgeRendererContainer = {
+	metadataBadgeRenderer: OwnerBadgeMetadataBadgeRenderer;
+};
 
-export interface Thumbnail {
-  url: string;
-  width: number;
-  height: number;
-}
-
-export interface Owner {
-  videoOwnerRenderer: VideoOwnerRenderer;
-}
-
-export interface VideoOwnerRenderer {
-  thumbnail: Background;
-  title: Byline;
-  navigationEndpoint: VideoOwnerRendererNavigationEndpoint;
-  subscriberCountText: YTRunContainer;
-  trackingParams: string;
-  badges: MetadataBadgeRendererContainer[];
-  membershipButton: MembershipButton;
-}
-
-export interface MetadataBadgeRendererContainer {
-  metadataBadgeRenderer: OwnerBadgeMetadataBadgeRenderer;
-}
-
-export interface OwnerBadgeMetadataBadgeRenderer {
-  icon: Icon;
-  style: PurpleStyle;
-  label?: string;
-  tooltip: string;
-  trackingParams: string;
-}
+export type OwnerBadgeMetadataBadgeRenderer = {
+	icon: Icon;
+	style: PurpleStyle;
+	label?: string;
+	tooltip: string;
+	trackingParams: string;
+};
 
 export enum PurpleStyle {
-  BadgeStyleTypeVerified = "BADGE_STYLE_TYPE_VERIFIED",
+	BadgeStyleTypeVerified = 'BADGE_STYLE_TYPE_VERIFIED'
 }
 
-export interface MembershipButton {
-  buttonRenderer: MembershipButtonButtonRenderer;
-}
+export type MembershipButton = {
+	buttonRenderer: MembershipButtonButtonRenderer;
+};
 
-export interface MembershipButtonButtonRenderer {
-  style: string;
-  size: string;
-  text: YTRunContainer;
-  navigationEndpoint: IndigoNavigationEndpoint;
-  trackingParams: string;
-  accessibilityData: YTAccessibilityData;
-  targetId: string;
-}
+export type MembershipButtonButtonRenderer = {
+	style: string;
+	size: string;
+	text: YTRunContainer;
+	navigationEndpoint: IndigoNavigationEndpoint;
+	trackingParams: string;
+	accessibilityData: YTAccessibilityData;
+	targetId: string;
+};
 
-export interface IndigoNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: DefaultNavigationEndpointCommandMetadata;
-  modalEndpoint: FluffyModalEndpoint;
-}
+export type IndigoNavigationEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: DefaultNavigationEndpointCommandMetadata;
+	modalEndpoint: FluffyModalEndpoint;
+};
 
-export interface FluffyModalEndpoint {
-  modal: TentacledModal;
-}
+export type FluffyModalEndpoint = {
+	modal: TentacledModal;
+};
 
-export interface TentacledModal {
-  modalWithTitleAndButtonRenderer: TentacledModalWithTitleAndButtonRenderer;
-}
+export type TentacledModal = {
+	modalWithTitleAndButtonRenderer: TentacledModalWithTitleAndButtonRenderer;
+};
 
-export interface TentacledModalWithTitleAndButtonRenderer {
-  title: YTSimpleTextContainer;
-  content: YTSimpleTextContainer;
-  button: TentacledButton;
-}
+export type TentacledModalWithTitleAndButtonRenderer = {
+	title: YTSimpleTextContainer;
+	content: YTSimpleTextContainer;
+	button: TentacledButton;
+};
 
-export interface TentacledButton {
-  buttonRenderer: TentacledButtonRenderer;
-}
+export type TentacledButton = {
+	buttonRenderer: TentacledButtonRenderer;
+};
 
-export interface TentacledButtonRenderer {
-  style: string;
-  size: string;
-  isDisabled: boolean;
-  text: YTSimpleTextContainer;
-  navigationEndpoint: IndecentNavigationEndpoint;
-  trackingParams: string;
-}
+export type TentacledButtonRenderer = {
+	style: string;
+	size: string;
+	isDisabled: boolean;
+	text: YTSimpleTextContainer;
+	navigationEndpoint: IndecentNavigationEndpoint;
+	trackingParams: string;
+};
 
-export interface IndecentNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTAutoplayVideoCommandMetadata;
-  signInEndpoint: ShowLiveChatParticipantsEndpointClass;
-}
+export type IndecentNavigationEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: YTAutoplayVideoCommandMetadata;
+	signInEndpoint: ShowLiveChatParticipantsEndpointClass;
+};
 
-export interface VideoOwnerRendererNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTAutoplayVideoCommandMetadata;
-  browseEndpoint: FluffyBrowseEndpoint;
-}
+export type VideoOwnerRendererNavigationEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: YTAutoplayVideoCommandMetadata;
+	browseEndpoint: FluffyBrowseEndpoint;
+};
 
-export interface FluffyBrowseEndpoint {
-  browseId: string;
-  canonicalBaseUrl: string;
-}
+export type FluffyBrowseEndpoint = {
+	browseId: string;
+	canonicalBaseUrl: string;
+};
 
-export interface Byline {
-  runs: BylineRun[];
-}
+export type Byline = {
+	runs: BylineRun[];
+};
 
-export interface BylineRun {
-  text: string;
-  navigationEndpoint: YTBrowseEndpointContainer;
-}
+export type BylineRun = {
+	text: string;
+	navigationEndpoint: YTBrowseEndpointContainer;
+};
 
-export interface SubscribeButton {
-  buttonRenderer: SubscribeButtonButtonRenderer;
-}
+export type SubscribeButton = {
+	buttonRenderer: SubscribeButtonButtonRenderer;
+};
 
-export interface SubscribeButtonButtonRenderer {
-  style: string;
-  size: string;
-  isDisabled: boolean;
-  text: YTRunContainer;
-  navigationEndpoint: HilariousNavigationEndpoint;
-  trackingParams: string;
-  targetId: string;
-}
+export type SubscribeButtonButtonRenderer = {
+	style: string;
+	size: string;
+	isDisabled: boolean;
+	text: YTRunContainer;
+	navigationEndpoint: HilariousNavigationEndpoint;
+	trackingParams: string;
+	targetId: string;
+};
 
-export interface HilariousNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: DefaultNavigationEndpointCommandMetadata;
-  modalEndpoint: TentacledModalEndpoint;
-}
+export type HilariousNavigationEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: DefaultNavigationEndpointCommandMetadata;
+	modalEndpoint: TentacledModalEndpoint;
+};
 
-export interface TentacledModalEndpoint {
-  modal: StickyModal;
-}
+export type TentacledModalEndpoint = {
+	modal: StickyModal;
+};
 
-export interface StickyModal {
-  modalWithTitleAndButtonRenderer: StickyModalWithTitleAndButtonRenderer;
-}
+export type StickyModal = {
+	modalWithTitleAndButtonRenderer: StickyModalWithTitleAndButtonRenderer;
+};
 
-export interface StickyModalWithTitleAndButtonRenderer {
-  title: YTSimpleTextContainer;
-  content: YTSimpleTextContainer;
-  button: StickyButton;
-}
+export type StickyModalWithTitleAndButtonRenderer = {
+	title: YTSimpleTextContainer;
+	content: YTSimpleTextContainer;
+	button: StickyButton;
+};
 
-export interface StickyButton {
-  buttonRenderer: StickyButtonRenderer;
-}
+export type StickyButton = {
+	buttonRenderer: StickyButtonRenderer;
+};
 
-export interface StickyButtonRenderer {
-  style: string;
-  size: string;
-  isDisabled: boolean;
-  text: YTSimpleTextContainer;
-  navigationEndpoint: AmbitiousNavigationEndpoint;
-  trackingParams: string;
-}
+export type StickyButtonRenderer = {
+	style: string;
+	size: string;
+	isDisabled: boolean;
+	text: YTSimpleTextContainer;
+	navigationEndpoint: AmbitiousNavigationEndpoint;
+	trackingParams: string;
+};
 
-export interface AmbitiousNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTAutoplayVideoCommandMetadata;
-  signInEndpoint: TentacledSignInEndpoint;
-}
+export type AmbitiousNavigationEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: YTAutoplayVideoCommandMetadata;
+	signInEndpoint: TentacledSignInEndpoint;
+};
 
-export interface TentacledSignInEndpoint {
-  nextEndpoint: CurrentVideoEndpointClass;
-  continueAction: string;
-  idamTag: string;
-}
+export type TentacledSignInEndpoint = {
+	nextEndpoint: CurrentVideoEndpointClass;
+	continueAction: string;
+	idamTag: string;
+};
 
-export interface YTTwoColumnWatchNextResultsSecondaryResults {
-  secondaryResults: SecondaryResultsSecondaryResults;
-}
+export type YTTwoColumnWatchNextResultsSecondaryResults = {
+	secondaryResults: SecondaryResultsSecondaryResults;
+};
 
-export interface SecondaryResultsSecondaryResults {
-  results: SecondaryResultsResult[];
-  trackingParams: string;
-  targetId: string;
-}
+export type SecondaryResultsSecondaryResults = {
+	results: SecondaryResultsResult[];
+	trackingParams: string;
+	targetId: string;
+};
 
-export interface SecondaryResultsResult {
-  compactAutoplayRenderer?: CompactAutoplayRenderer;
-  compactVideoRenderer?: ResultCompactVideoRenderer;
-  continuationItemRenderer?: ContinuationItemRenderer;
-}
+export type SecondaryResultsResult = {
+	compactAutoplayRenderer?: CompactAutoplayRenderer;
+	compactVideoRenderer?: ResultCompactVideoRenderer;
+	continuationItemRenderer?: ContinuationItemRenderer;
+};
 
-export interface CompactAutoplayRenderer {
-  title: YTSimpleTextContainer;
-  toggleDescription: YTRunContainer;
-  infoIcon: Icon;
-  infoText: YTRunContainer;
-  contents: CompactAutoplayRendererContent[];
-  trackingParams: string;
-}
+export type CompactAutoplayRenderer = {
+	title: YTSimpleTextContainer;
+	toggleDescription: YTRunContainer;
+	infoIcon: Icon;
+	infoText: YTRunContainer;
+	contents: CompactAutoplayRendererContent[];
+	trackingParams: string;
+};
 
-export interface CompactAutoplayRendererContent {
-  compactVideoRenderer: ContentCompactVideoRenderer;
-}
+export type CompactAutoplayRendererContent = {
+	compactVideoRenderer: ContentCompactVideoRenderer;
+};
 
-export interface ContentCompactVideoRenderer {
-  videoId: string;
-  thumbnail: Background;
-  title: YTSimpleTextContainer;
-  longBylineText: BylineText;
-  publishedTimeText: YTSimpleTextContainer;
-  viewCountText: YTSimpleTextContainer;
-  lengthText: YTSimpleTextContainer;
-  navigationEndpoint: CompactVideoRendererNavigationEndpoint;
-  shortBylineText: BylineText;
-  badges: PurpleBadge[];
-  channelThumbnail: Background;
-  ownerBadges: MetadataBadgeRendererContainer[];
-  trackingParams: string;
-  shortViewCountText: YTSimpleTextContainer;
-  menu: Menu;
-  thumbnailOverlays: CompactVideoRendererThumbnailOverlay[];
-  accessibility: YTAccessibilityData;
-}
+export type ContentCompactVideoRenderer = {
+	videoId: string;
+	thumbnail: Background;
+	title: YTSimpleTextContainer;
+	longBylineText: BylineText;
+	publishedTimeText: YTSimpleTextContainer;
+	viewCountText: YTSimpleTextContainer;
+	lengthText: YTSimpleTextContainer;
+	navigationEndpoint: CompactVideoRendererNavigationEndpoint;
+	shortBylineText: BylineText;
+	badges: PurpleBadge[];
+	channelThumbnail: Background;
+	ownerBadges: MetadataBadgeRendererContainer[];
+	trackingParams: string;
+	shortViewCountText: YTSimpleTextContainer;
+	menu: Menu;
+	thumbnailOverlays: CompactVideoRendererThumbnailOverlay[];
+	accessibility: YTAccessibilityData;
+};
 
-export interface PurpleBadge {
-  metadataBadgeRenderer: PurpleMetadataBadgeRenderer;
-}
+export type PurpleBadge = {
+	metadataBadgeRenderer: PurpleMetadataBadgeRenderer;
+};
 
-export interface PurpleMetadataBadgeRenderer {
-  style: FluffyStyle;
-  label: Label;
-  trackingParams: string;
-}
+export type PurpleMetadataBadgeRenderer = {
+	style: FluffyStyle;
+	label: Label;
+	trackingParams: string;
+};
 
 export enum Label {
-  ライブ配信中 = "ライブ配信中",
-  新着 = "新着",
+	ライブ配信中 = 'ライブ配信中',
+	新着 = '新着'
 }
 
 export enum FluffyStyle {
-  BadgeStyleTypeLiveNow = "BADGE_STYLE_TYPE_LIVE_NOW",
-  BadgeStyleTypeSimple = "BADGE_STYLE_TYPE_SIMPLE",
+	BadgeStyleTypeLiveNow = 'BADGE_STYLE_TYPE_LIVE_NOW',
+	BadgeStyleTypeSimple = 'BADGE_STYLE_TYPE_SIMPLE'
 }
 
-export interface BylineText {
-  runs: LongBylineTextRun[];
-}
+export type BylineText = {
+	runs: LongBylineTextRun[];
+};
 
-export interface LongBylineTextRun {
-  text: string;
-  navigationEndpoint: VideoOwnerRendererNavigationEndpoint;
-}
+export type LongBylineTextRun = {
+	text: string;
+	navigationEndpoint: VideoOwnerRendererNavigationEndpoint;
+};
 
-export interface Menu {
-  menuRenderer: MenuMenuRenderer;
-}
+export type Menu = {
+	menuRenderer: MenuMenuRenderer;
+};
 
-export interface MenuMenuRenderer {
-  items: FluffyItem[];
-  trackingParams: string;
-  accessibility: YTAccessibilityData;
-  targetId?: string;
-}
+export type MenuMenuRenderer = {
+	items: FluffyItem[];
+	trackingParams: string;
+	accessibility: YTAccessibilityData;
+	targetId?: string;
+};
 
-export interface FluffyItem {
-  menuServiceItemRenderer: YTMenuItemRenderer;
-}
+export type FluffyItem = {
+	menuServiceItemRenderer: YTMenuItemRenderer;
+};
 
-export interface CompactVideoRendererNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTAutoplayVideoCommandMetadata;
-  watchEndpoint: PurpleWatchEndpoint;
-}
+export type CompactVideoRendererNavigationEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: YTAutoplayVideoCommandMetadata;
+	watchEndpoint: PurpleWatchEndpoint;
+};
 
-export interface PurpleWatchEndpoint {
-  videoId: string;
-  nofollow: boolean;
-}
+export type PurpleWatchEndpoint = {
+	videoId: string;
+	nofollow: boolean;
+};
 
-export interface CompactVideoRendererThumbnailOverlay {
-  thumbnailOverlayTimeStatusRenderer?: PurpleThumbnailOverlayTimeStatusRenderer;
-  thumbnailOverlayToggleButtonRenderer?: ThumbnailOverlayToggleButtonRenderer;
-  thumbnailOverlayNowPlayingRenderer?: ThumbnailOverlayNowPlayingRenderer;
-}
+export type CompactVideoRendererThumbnailOverlay = {
+	thumbnailOverlayTimeStatusRenderer?: PurpleThumbnailOverlayTimeStatusRenderer;
+	thumbnailOverlayToggleButtonRenderer?: ThumbnailOverlayToggleButtonRenderer;
+	thumbnailOverlayNowPlayingRenderer?: ThumbnailOverlayNowPlayingRenderer;
+};
 
-export interface ThumbnailOverlayNowPlayingRenderer {
-  text: YTRunContainer;
-}
+export type ThumbnailOverlayNowPlayingRenderer = {
+	text: YTRunContainer;
+};
 
-export interface PurpleThumbnailOverlayTimeStatusRenderer {
-  text: YTSimpleTextContainer;
-  style: ThumbnailOverlayTimeStatusRendererStyle;
-}
+export type PurpleThumbnailOverlayTimeStatusRenderer = {
+	text: YTSimpleTextContainer;
+	style: ThumbnailOverlayTimeStatusRendererStyle;
+};
 
 export enum ThumbnailOverlayTimeStatusRendererStyle {
-  Default = "DEFAULT",
-  Live = "LIVE",
+	Default = 'DEFAULT',
+	Live = 'LIVE'
 }
 
-export interface ThumbnailOverlayToggleButtonRenderer {
-  isToggled?: boolean;
-  untoggledIcon: Icon;
-  toggledIcon: Icon;
-  untoggledTooltip: string;
-  toggledTooltip: string;
-  untoggledServiceEndpoint: UntoggledServiceEndpoint;
-  toggledServiceEndpoint?: ToggledServiceEndpoint;
-  untoggledAccessibility: YTAccessibilityData;
-  toggledAccessibility: YTAccessibilityData;
-  trackingParams: string;
-}
+export type ThumbnailOverlayToggleButtonRenderer = {
+	isToggled?: boolean;
+	untoggledIcon: Icon;
+	toggledIcon: Icon;
+	untoggledTooltip: string;
+	toggledTooltip: string;
+	untoggledServiceEndpoint: UntoggledServiceEndpoint;
+	toggledServiceEndpoint?: ToggledServiceEndpoint;
+	untoggledAccessibility: YTAccessibilityData;
+	toggledAccessibility: YTAccessibilityData;
+	trackingParams: string;
+};
 
-export interface ToggledServiceEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTApiEndpointMetadataContainer;
-  playlistEditEndpoint: ToggledServiceEndpointPlaylistEditEndpoint;
-}
+export type ToggledServiceEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: YTApiEndpointMetadataContainer;
+	playlistEditEndpoint: ToggledServiceEndpointPlaylistEditEndpoint;
+};
 
-export interface ToggledServiceEndpointPlaylistEditEndpoint {
-  playlistId: PlaylistID;
-  actions: FluffyAction[];
-}
+export type ToggledServiceEndpointPlaylistEditEndpoint = {
+	playlistId: PlaylistID;
+	actions: FluffyAction[];
+};
 
-export interface FluffyAction {
-  action: HilariousAction;
-  removedVideoId: string;
-}
+export type FluffyAction = {
+	action: HilariousAction;
+	removedVideoId: string;
+};
 
 export enum HilariousAction {
-  ActionRemoveVideoByVideoID = "ACTION_REMOVE_VIDEO_BY_VIDEO_ID",
+	ActionRemoveVideoByVideoID = 'ACTION_REMOVE_VIDEO_BY_VIDEO_ID'
 }
 
 export enum PlaylistID {
-  Wl = "WL",
+	Wl = 'WL'
 }
 
-export interface UntoggledServiceEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTApiEndpointMetadataContainer;
-  playlistEditEndpoint?: UntoggledServiceEndpointPlaylistEditEndpoint;
-  signalServiceEndpoint?: UntoggledServiceEndpointSignalServiceEndpoint;
-}
+export type UntoggledServiceEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: YTApiEndpointMetadataContainer;
+	playlistEditEndpoint?: UntoggledServiceEndpointPlaylistEditEndpoint;
+	signalServiceEndpoint?: UntoggledServiceEndpointSignalServiceEndpoint;
+};
 
-export interface UntoggledServiceEndpointPlaylistEditEndpoint {
-  playlistId: PlaylistID;
-  actions: TentacledAction[];
-}
+export type UntoggledServiceEndpointPlaylistEditEndpoint = {
+	playlistId: PlaylistID;
+	actions: TentacledAction[];
+};
 
-export interface TentacledAction {
-  addedVideoId: string;
-  action: AmbitiousAction;
-}
+export type TentacledAction = {
+	addedVideoId: string;
+	action: AmbitiousAction;
+};
 
 export enum AmbitiousAction {
-  ActionAddVideo = "ACTION_ADD_VIDEO",
-}
-
-export interface UntoggledServiceEndpointSignalServiceEndpoint {
-  signal: Signal;
-  actions: StickyAction[];
-}
-
-export interface StickyAction {
-  clickTrackingParams: string;
-  addToPlaylistCommand: AddToPlaylistCommand;
-}
-
-export interface ResultCompactVideoRenderer {
-  videoId: string;
-  thumbnail: Background;
-  title: YTSimpleTextContainer;
-  longBylineText: BylineText;
-  publishedTimeText?: YTSimpleTextContainer;
-  viewCountText: ShortViewCountText;
-  lengthText?: YTSimpleTextContainer;
-  navigationEndpoint: CompactVideoRendererNavigationEndpoint;
-  shortBylineText: BylineText;
-  badges?: PurpleBadge[];
-  channelThumbnail: Background;
-  ownerBadges?: MetadataBadgeRendererContainer[];
-  trackingParams: string;
-  shortViewCountText: ShortViewCountText;
-  menu: Menu;
-  thumbnailOverlays: CompactVideoRendererThumbnailOverlay[];
-  accessibility: YTAccessibilityData;
-}
-
-export interface ContinuationItemRenderer {
-  trigger: string;
-  continuationEndpoint: YTContinuationEndpoint;
-  button: ContinuationItemRendererButton;
-}
-
-export interface ContinuationItemRendererButton {
-  buttonRenderer: IndigoButtonRenderer;
-}
-
-export interface IndigoButtonRenderer {
-  style: string;
-  size: string;
-  isDisabled: boolean;
-  text: YTRunContainer;
-  trackingParams: string;
-  command: YTContinuationEndpoint;
-}
-
-export interface YTContinuationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTApiEndpointMetadataContainer;
-  continuationCommand: ContinuationCommand;
-}
-
-export interface ContinuationCommand {
-  token: string;
-  request: string;
-}
-
-export interface FrameworkUpdates {}
-
-export interface OnResponseReceivedEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: OnResponseReceivedEndpointCommandMetadata;
-  signalServiceEndpoint: OnResponseReceivedEndpointSignalServiceEndpoint;
-}
-
-export interface OnResponseReceivedEndpointSignalServiceEndpoint {
-  signal: Signal;
-  actions: IndigoAction[];
-}
-
-export interface IndigoAction {
-  clickTrackingParams: string;
-  signalAction: SignalAction;
-}
-
-export interface SignalAction {
-  signal: string;
-}
-
-export interface Overlay {
-  tooltipRenderer: TooltipRenderer;
-}
-
-export interface TooltipRenderer {
-  promoConfig: PromoConfig;
-  targetId: string;
-  text: YTRunContainer;
-  detailsText: YTRunContainer;
-  dismissButton: DismissButton;
-  suggestedPosition: DismissStrategy;
-  dismissStrategy: DismissStrategy;
-  trackingParams: string;
-}
-
-export interface DismissButton {
-  buttonRenderer: IndecentButtonRenderer;
-}
-
-export interface IndecentButtonRenderer {
-  style: string;
-  size: string;
-  text: YTRunContainer;
-  trackingParams: string;
-  command: AcceptCommand;
-}
-
-export interface AcceptCommand {
-  clickTrackingParams: string;
-  commandMetadata: YTApiEndpointMetadataContainer;
-  feedbackEndpoint: FeedbackEndpoint;
-}
-
-export interface FeedbackEndpoint {
-  feedbackToken: string;
-  uiActions: UIActions;
-}
-
-export interface DismissStrategy {
-  type: string;
-}
-
-export interface PromoConfig {
-  promoId: string;
-  impressionEndpoints: AcceptCommand[];
-  acceptCommand: AcceptCommand;
-  dismissCommand: AcceptCommand;
-}
-
-export interface PlayerOverlays {
-  playerOverlayRenderer: PlayerOverlayRenderer;
-}
-
-export interface PlayerOverlayRenderer {
-  endScreen: EndScreen;
-  autoplay: PlayerOverlayRendererAutoplay;
-  shareButton: YTShareButton;
-}
-
-export interface PlayerOverlayRendererAutoplay {
-  playerOverlayAutoplayRenderer: PlayerOverlayAutoplayRenderer;
-}
-
-export interface PlayerOverlayAutoplayRenderer {
-  title: YTSimpleTextContainer;
-  videoTitle: YTSimpleTextContainer;
-  byline: Byline;
-  cancelText: YTSimpleTextContainer;
-  pauseText: YTSimpleTextContainer;
-  background: Background;
-  countDownSecs: number;
-  nextButton: NextButton;
-  trackingParams: string;
-  preferImmediateRedirect: boolean;
-  videoId: string;
-  publishedTimeText: YTSimpleTextContainer;
-  webShowNewAutonavCountdown: boolean;
-  webShowBigThumbnailEndscreen: boolean;
-  shortViewCountText: YTSimpleTextContainer;
-}
-
-export interface NextButton {
-  buttonRenderer: NextButtonButtonRenderer;
-}
-
-export interface NextButtonButtonRenderer {
-  navigationEndpoint: CurrentVideoEndpointClass;
-  accessibility: YTAccessibilityLabel;
-  trackingParams: string;
-}
-
-export interface EndScreen {
-  watchNextEndScreenRenderer: WatchNextEndScreenRenderer;
-}
-
-export interface WatchNextEndScreenRenderer {
-  results: WatchNextEndScreenRendererResult[];
-  title: YTSimpleTextContainer;
-  trackingParams: string;
-}
-
-export interface WatchNextEndScreenRendererResult {
-  endScreenVideoRenderer: EndScreenVideoRenderer;
-}
-
-export interface EndScreenVideoRenderer {
-  videoId: string;
-  thumbnail: Background;
-  title: YTSimpleTextContainer;
-  shortBylineText: BylineText;
-  lengthText?: YTSimpleTextContainer;
-  lengthInSeconds?: number;
-  navigationEndpoint: CurrentVideoEndpointClass;
-  trackingParams: string;
-  shortViewCountText: ShortViewCountText;
-  publishedTimeText: YTSimpleTextContainer;
-  thumbnailOverlays: EndScreenVideoRendererThumbnailOverlay[];
-}
-
-export interface EndScreenVideoRendererThumbnailOverlay {
-  thumbnailOverlayTimeStatusRenderer?: FluffyThumbnailOverlayTimeStatusRenderer;
-  thumbnailOverlayNowPlayingRenderer?: ThumbnailOverlayNowPlayingRenderer;
-}
-
-export interface FluffyThumbnailOverlayTimeStatusRenderer {
-  text: YTText;
-  style: ThumbnailOverlayTimeStatusRendererStyle;
-  icon?: Icon;
-}
-
-export interface YTShareButton {
-  buttonRenderer: ShareButtonButtonRenderer;
-}
-
-export interface ShareButtonButtonRenderer {
-  style: string;
-  size: string;
-  isDisabled: boolean;
-  icon: Icon;
-  navigationEndpoint: CunningNavigationEndpoint;
-  tooltip: string;
-  trackingParams: string;
-}
-
-export interface CunningNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: DefaultNavigationEndpointCommandMetadata;
-  shareEntityEndpoint: ShareEntityEndpoint;
-}
-
-export interface ShareEntityEndpoint {
-  serializedShareEntity: string;
-}
-
-export interface YTResponseContext {
-  serviceTrackingParams: YTServiceTrackingParam[];
-  webResponseContextExtensionData: WebResponseContextExtensionData;
-}
-
-export interface YTServiceTrackingParam {
-  service: string;
-  params: YTParam[];
-}
-
-export interface YTParam {
-  key: string;
-  value: string;
-}
-
-export interface WebResponseContextExtensionData {
-  ytConfigData: YTConfigData;
-  webPrefetchData: WebPrefetchData;
-  hasDecorated: boolean;
-}
-
-export interface WebPrefetchData {
-  navigationEndpoints: YTNavigationEndpoint[];
-}
-
-export interface YTConfigData {
-  visitorData: string;
-  rootVisualElementType: number;
-}
-
-export interface Topbar {
-  desktopTopbarRenderer: DesktopTopbarRenderer;
-}
-
-export interface DesktopTopbarRenderer {
-  logo: Logo;
-  searchbox: Searchbox;
-  trackingParams: string;
-  countryCode: string;
-  topbarButtons: TopbarButton[];
-  hotkeyDialog: HotkeyDialog;
-  backButton: BackButtonClass;
-  forwardButton: BackButtonClass;
-  a11ySkipNavigationButton: A11YSkipNavigationButton;
-}
-
-export interface A11YSkipNavigationButton {
-  buttonRenderer: A11YSkipNavigationButtonButtonRenderer;
-}
-
-export interface A11YSkipNavigationButtonButtonRenderer {
-  style: string;
-  size: string;
-  isDisabled: boolean;
-  text: YTRunContainer;
-  trackingParams: string;
-  command: OnResponseReceivedEndpoint;
-}
-
-export interface BackButtonClass {
-  buttonRenderer: BackButtonButtonRenderer;
-}
-
-export interface BackButtonButtonRenderer {
-  trackingParams: string;
-  command: OnResponseReceivedEndpoint;
-}
-
-export interface HotkeyDialog {
-  hotkeyDialogRenderer: HotkeyDialogRenderer;
-}
-
-export interface HotkeyDialogRenderer {
-  title: YTRunContainer;
-  sections: HotkeyDialogRendererSection[];
-  dismissButton: YTDismissButtonClass;
-  trackingParams: string;
-}
-
-export interface HotkeyDialogRendererSection {
-  hotkeyDialogSectionRenderer: HotkeyDialogSectionRenderer;
-}
-
-export interface HotkeyDialogSectionRenderer {
-  title: YTRunContainer;
-  options: Option[];
-}
-
-export interface Option {
-  hotkeyDialogSectionOptionRenderer: HotkeyDialogSectionOptionRenderer;
-}
-
-export interface HotkeyDialogSectionOptionRenderer {
-  label: YTRunContainer;
-  hotkey: string;
-  hotkeyAccessibilityLabel?: YTAccessibilityData;
-}
-
-export interface Logo {
-  topbarLogoRenderer: TopbarLogoRenderer;
-}
-
-export interface TopbarLogoRenderer {
-  iconImage: Icon;
-  tooltipText: YTRunContainer;
-  endpoint: YTBrowseEndpointContainer;
-  trackingParams: string;
-}
-
-export interface Searchbox {
-  fusionSearchboxRenderer: FusionSearchboxRenderer;
-}
-
-export interface FusionSearchboxRenderer {
-  icon: Icon;
-  placeholderText: YTRunContainer;
-  config: FusionSearchboxRendererConfig;
-  trackingParams: string;
-  searchEndpoint: FusionSearchboxRendererSearchEndpoint;
-}
-
-export interface FusionSearchboxRendererConfig {
-  webSearchboxConfig: WebSearchboxConfig;
-}
-
-export interface WebSearchboxConfig {
-  requestLanguage: string;
-  requestDomain: string;
-  hasOnscreenKeyboard: boolean;
-  focusSearchbox: boolean;
-}
-
-export interface FusionSearchboxRendererSearchEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTAutoplayVideoCommandMetadata;
-  searchEndpoint: SearchEndpointSearchEndpoint;
-}
-
-export interface SearchEndpointSearchEndpoint {
-  query: string;
-}
-
-export interface TopbarButton {
-  topbarMenuButtonRenderer?: TopbarMenuButtonRenderer;
-  buttonRenderer?: TopbarButtonButtonRenderer;
-}
-
-export interface TopbarButtonButtonRenderer {
-  style: string;
-  size: string;
-  text: YTRunContainer;
-  icon: Icon;
-  navigationEndpoint: MagentaNavigationEndpoint;
-  trackingParams: string;
-  targetId: string;
-}
-
-export interface MagentaNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTAutoplayVideoCommandMetadata;
-  signInEndpoint: StickySignInEndpoint;
-}
-
-export interface StickySignInEndpoint {
-  idamTag: string;
-}
-
-export interface TopbarMenuButtonRenderer {
-  icon: Icon;
-  menuRenderer?: TopbarMenuButtonRendererMenuRenderer;
-  trackingParams: string;
-  accessibility: YTAccessibilityData;
-  tooltip: string;
-  style: string;
-  targetId?: string;
-  menuRequest?: MenuRequest;
-}
-
-export interface TopbarMenuButtonRendererMenuRenderer {
-  multiPageMenuRenderer: MenuRendererMultiPageMenuRenderer;
-}
-
-export interface MenuRendererMultiPageMenuRenderer {
-  sections: MultiPageMenuRendererSection[];
-  trackingParams: string;
-}
-
-export interface MultiPageMenuRendererSection {
-  multiPageMenuSectionRenderer: MultiPageMenuSectionRenderer;
-}
-
-export interface MultiPageMenuSectionRenderer {
-  items: MultiPageMenuSectionRendererItem[];
-  trackingParams: string;
-}
-
-export interface MultiPageMenuSectionRendererItem {
-  compactLinkRenderer: CompactLinkRenderer;
-}
-
-export interface CompactLinkRenderer {
-  icon: Icon;
-  title: YTRunContainer;
-  navigationEndpoint: CompactLinkRendererNavigationEndpoint;
-  trackingParams: string;
-}
-
-export interface CompactLinkRendererNavigationEndpoint {
-  clickTrackingParams: string;
-  commandMetadata: YTAutoplayVideoCommandMetadata;
-  urlEndpoint: FluffyURLEndpoint;
-}
-
-export interface FluffyURLEndpoint {
-  url: string;
-  target: string;
-}
-
-export interface MenuRequest {
-  clickTrackingParams: string;
-  commandMetadata: YTApiEndpointMetadataContainer;
-  signalServiceEndpoint: MenuRequestSignalServiceEndpoint;
-}
-
-export interface MenuRequestSignalServiceEndpoint {
-  signal: string;
-  actions: YTIndecentAction[];
-}
-
-export interface YTIndecentAction {
-  clickTrackingParams: string;
-  openPopupAction: FluffyOpenPopupAction;
-}
-
-export interface FluffyOpenPopupAction {
-  popup: TentacledPopup;
-  popupType: string;
-  beReused: boolean;
-}
-
-export interface TentacledPopup {
-  multiPageMenuRenderer: PopupMultiPageMenuRenderer;
-}
-
-export interface PopupMultiPageMenuRenderer {
-  trackingParams: string;
-  style: string;
-  showLoadingSpinner: boolean;
-}
-
-export interface YTWebWatchNextResponseExtensionData {
-  relatedVideoArgs: string;
-}
+	ActionAddVideo = 'ACTION_ADD_VIDEO'
+}
+
+export type UntoggledServiceEndpointSignalServiceEndpoint = {
+	signal: Signal;
+	actions: StickyAction[];
+};
+
+export type StickyAction = {
+	clickTrackingParams: string;
+	addToPlaylistCommand: AddToPlaylistCommand;
+};
+
+export type ResultCompactVideoRenderer = {
+	videoId: string;
+	thumbnail: Background;
+	title: YTSimpleTextContainer;
+	longBylineText: BylineText;
+	publishedTimeText?: YTSimpleTextContainer;
+	viewCountText: ShortViewCountText;
+	lengthText?: YTSimpleTextContainer;
+	navigationEndpoint: CompactVideoRendererNavigationEndpoint;
+	shortBylineText: BylineText;
+	badges?: PurpleBadge[];
+	channelThumbnail: Background;
+	ownerBadges?: MetadataBadgeRendererContainer[];
+	trackingParams: string;
+	shortViewCountText: ShortViewCountText;
+	menu: Menu;
+	thumbnailOverlays: CompactVideoRendererThumbnailOverlay[];
+	accessibility: YTAccessibilityData;
+};
+
+export type ContinuationItemRenderer = {
+	trigger: string;
+	continuationEndpoint: YTContinuationEndpoint;
+	button: ContinuationItemRendererButton;
+};
+
+export type ContinuationItemRendererButton = {
+	buttonRenderer: IndigoButtonRenderer;
+};
+
+export type IndigoButtonRenderer = {
+	style: string;
+	size: string;
+	isDisabled: boolean;
+	text: YTRunContainer;
+	trackingParams: string;
+	command: YTContinuationEndpoint;
+};
+
+export type YTContinuationEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: YTApiEndpointMetadataContainer;
+	continuationCommand: ContinuationCommand;
+};
+
+export type ContinuationCommand = {
+	token: string;
+	request: string;
+};
+
+export type FrameworkUpdates = NonNullable<unknown>;
+
+export type OnResponseReceivedEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: OnResponseReceivedEndpointCommandMetadata;
+	signalServiceEndpoint: OnResponseReceivedEndpointSignalServiceEndpoint;
+};
+
+export type OnResponseReceivedEndpointSignalServiceEndpoint = {
+	signal: Signal;
+	actions: IndigoAction[];
+};
+
+export type IndigoAction = {
+	clickTrackingParams: string;
+	signalAction: SignalAction;
+};
+
+export type SignalAction = {
+	signal: string;
+};
+
+export type Overlay = {
+	tooltipRenderer: TooltipRenderer;
+};
+
+export type TooltipRenderer = {
+	promoConfig: PromoConfig;
+	targetId: string;
+	text: YTRunContainer;
+	detailsText: YTRunContainer;
+	dismissButton: DismissButton;
+	suggestedPosition: DismissStrategy;
+	dismissStrategy: DismissStrategy;
+	trackingParams: string;
+};
+
+export type DismissButton = {
+	buttonRenderer: IndecentButtonRenderer;
+};
+
+export type IndecentButtonRenderer = {
+	style: string;
+	size: string;
+	text: YTRunContainer;
+	trackingParams: string;
+	command: AcceptCommand;
+};
+
+export type AcceptCommand = {
+	clickTrackingParams: string;
+	commandMetadata: YTApiEndpointMetadataContainer;
+	feedbackEndpoint: FeedbackEndpoint;
+};
+
+export type FeedbackEndpoint = {
+	feedbackToken: string;
+	uiActions: UIActions;
+};
+
+export type DismissStrategy = {
+	type: string;
+};
+
+export type PromoConfig = {
+	promoId: string;
+	impressionEndpoints: AcceptCommand[];
+	acceptCommand: AcceptCommand;
+	dismissCommand: AcceptCommand;
+};
+
+export type PlayerOverlays = {
+	playerOverlayRenderer: PlayerOverlayRenderer;
+};
+
+export type PlayerOverlayRenderer = {
+	endScreen: EndScreen;
+	autoplay: PlayerOverlayRendererAutoplay;
+	shareButton: YTShareButton;
+};
+
+export type PlayerOverlayRendererAutoplay = {
+	playerOverlayAutoplayRenderer: PlayerOverlayAutoplayRenderer;
+};
+
+export type PlayerOverlayAutoplayRenderer = {
+	title: YTSimpleTextContainer;
+	videoTitle: YTSimpleTextContainer;
+	byline: Byline;
+	cancelText: YTSimpleTextContainer;
+	pauseText: YTSimpleTextContainer;
+	background: Background;
+	countDownSecs: number;
+	nextButton: NextButton;
+	trackingParams: string;
+	preferImmediateRedirect: boolean;
+	videoId: string;
+	publishedTimeText: YTSimpleTextContainer;
+	webShowNewAutonavCountdown: boolean;
+	webShowBigThumbnailEndscreen: boolean;
+	shortViewCountText: YTSimpleTextContainer;
+};
+
+export type NextButton = {
+	buttonRenderer: NextButtonButtonRenderer;
+};
+
+export type NextButtonButtonRenderer = {
+	navigationEndpoint: CurrentVideoEndpointClass;
+	accessibility: YTAccessibilityLabel;
+	trackingParams: string;
+};
+
+export type EndScreen = {
+	watchNextEndScreenRenderer: WatchNextEndScreenRenderer;
+};
+
+export type WatchNextEndScreenRenderer = {
+	results: WatchNextEndScreenRendererResult[];
+	title: YTSimpleTextContainer;
+	trackingParams: string;
+};
+
+export type WatchNextEndScreenRendererResult = {
+	endScreenVideoRenderer: EndScreenVideoRenderer;
+};
+
+export type EndScreenVideoRenderer = {
+	videoId: string;
+	thumbnail: Background;
+	title: YTSimpleTextContainer;
+	shortBylineText: BylineText;
+	lengthText?: YTSimpleTextContainer;
+	lengthInSeconds?: number;
+	navigationEndpoint: CurrentVideoEndpointClass;
+	trackingParams: string;
+	shortViewCountText: ShortViewCountText;
+	publishedTimeText: YTSimpleTextContainer;
+	thumbnailOverlays: EndScreenVideoRendererThumbnailOverlay[];
+};
+
+export type EndScreenVideoRendererThumbnailOverlay = {
+	thumbnailOverlayTimeStatusRenderer?: FluffyThumbnailOverlayTimeStatusRenderer;
+	thumbnailOverlayNowPlayingRenderer?: ThumbnailOverlayNowPlayingRenderer;
+};
+
+export type FluffyThumbnailOverlayTimeStatusRenderer = {
+	text: YTText;
+	style: ThumbnailOverlayTimeStatusRendererStyle;
+	icon?: Icon;
+};
+
+export type YTShareButton = {
+	buttonRenderer: ShareButtonButtonRenderer;
+};
+
+export type ShareButtonButtonRenderer = {
+	style: string;
+	size: string;
+	isDisabled: boolean;
+	icon: Icon;
+	navigationEndpoint: CunningNavigationEndpoint;
+	tooltip: string;
+	trackingParams: string;
+};
+
+export type CunningNavigationEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: DefaultNavigationEndpointCommandMetadata;
+	shareEntityEndpoint: ShareEntityEndpoint;
+};
+
+export type ShareEntityEndpoint = {
+	serializedShareEntity: string;
+};
+
+export type YTServiceTrackingParam = {
+	service: string;
+	params: YTParam[];
+};
+
+export type YTParam = {
+	key: string;
+	value: string;
+};
+
+export type YTConfigData = {
+	visitorData: string;
+	rootVisualElementType: number;
+};
+
+export type Topbar = {
+	desktopTopbarRenderer: DesktopTopbarRenderer;
+};
+
+export type DesktopTopbarRenderer = {
+	logo: Logo;
+	searchbox: Searchbox;
+	trackingParams: string;
+	countryCode: string;
+	topbarButtons: TopbarButton[];
+	hotkeyDialog: HotkeyDialog;
+	backButton: BackButtonClass;
+	forwardButton: BackButtonClass;
+	a11ySkipNavigationButton: A11YSkipNavigationButton;
+};
+
+export type A11YSkipNavigationButton = {
+	buttonRenderer: A11YSkipNavigationButtonButtonRenderer;
+};
+
+export type A11YSkipNavigationButtonButtonRenderer = {
+	style: string;
+	size: string;
+	isDisabled: boolean;
+	text: YTRunContainer;
+	trackingParams: string;
+	command: OnResponseReceivedEndpoint;
+};
+
+export type BackButtonClass = {
+	buttonRenderer: BackButtonButtonRenderer;
+};
+
+export type BackButtonButtonRenderer = {
+	trackingParams: string;
+	command: OnResponseReceivedEndpoint;
+};
+
+export type HotkeyDialog = {
+	hotkeyDialogRenderer: HotkeyDialogRenderer;
+};
+
+export type HotkeyDialogRenderer = {
+	title: YTRunContainer;
+	sections: HotkeyDialogRendererSection[];
+	dismissButton: YTDismissButtonClass;
+	trackingParams: string;
+};
+
+export type HotkeyDialogRendererSection = {
+	hotkeyDialogSectionRenderer: HotkeyDialogSectionRenderer;
+};
+
+export type HotkeyDialogSectionRenderer = {
+	title: YTRunContainer;
+	options: Option[];
+};
+
+export type Option = {
+	hotkeyDialogSectionOptionRenderer: HotkeyDialogSectionOptionRenderer;
+};
+
+export type HotkeyDialogSectionOptionRenderer = {
+	label: YTRunContainer;
+	hotkey: string;
+	hotkeyAccessibilityLabel?: YTAccessibilityData;
+};
+
+export type Logo = {
+	topbarLogoRenderer: TopbarLogoRenderer;
+};
+
+export type TopbarLogoRenderer = {
+	iconImage: Icon;
+	tooltipText: YTRunContainer;
+	endpoint: YTBrowseEndpointContainer;
+	trackingParams: string;
+};
+
+export type Searchbox = {
+	fusionSearchboxRenderer: FusionSearchboxRenderer;
+};
+
+export type FusionSearchboxRenderer = {
+	icon: Icon;
+	placeholderText: YTRunContainer;
+	config: FusionSearchboxRendererConfig;
+	trackingParams: string;
+	searchEndpoint: FusionSearchboxRendererSearchEndpoint;
+};
+
+export type FusionSearchboxRendererConfig = {
+	webSearchboxConfig: WebSearchboxConfig;
+};
+
+export type WebSearchboxConfig = {
+	requestLanguage: string;
+	requestDomain: string;
+	hasOnscreenKeyboard: boolean;
+	focusSearchbox: boolean;
+};
+
+export type FusionSearchboxRendererSearchEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: YTAutoplayVideoCommandMetadata;
+	searchEndpoint: SearchEndpointSearchEndpoint;
+};
+
+export type SearchEndpointSearchEndpoint = {
+	query: string;
+};
+
+export type TopbarButton = {
+	topbarMenuButtonRenderer?: TopbarMenuButtonRenderer;
+	buttonRenderer?: TopbarButtonButtonRenderer;
+};
+
+export type TopbarButtonButtonRenderer = {
+	style: string;
+	size: string;
+	text: YTRunContainer;
+	icon: Icon;
+	navigationEndpoint: MagentaNavigationEndpoint;
+	trackingParams: string;
+	targetId: string;
+};
+
+export type MagentaNavigationEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: YTAutoplayVideoCommandMetadata;
+	signInEndpoint: StickySignInEndpoint;
+};
+
+export type StickySignInEndpoint = {
+	idamTag: string;
+};
+
+export type TopbarMenuButtonRenderer = {
+	icon: Icon;
+	menuRenderer?: TopbarMenuButtonRendererMenuRenderer;
+	trackingParams: string;
+	accessibility: YTAccessibilityData;
+	tooltip: string;
+	style: string;
+	targetId?: string;
+	menuRequest?: MenuRequest;
+};
+
+export type TopbarMenuButtonRendererMenuRenderer = {
+	multiPageMenuRenderer: MenuRendererMultiPageMenuRenderer;
+};
+
+export type MenuRendererMultiPageMenuRenderer = {
+	sections: MultiPageMenuRendererSection[];
+	trackingParams: string;
+};
+
+export type MultiPageMenuRendererSection = {
+	multiPageMenuSectionRenderer: MultiPageMenuSectionRenderer;
+};
+
+export type MultiPageMenuSectionRenderer = {
+	items: MultiPageMenuSectionRendererItem[];
+	trackingParams: string;
+};
+
+export type MultiPageMenuSectionRendererItem = {
+	compactLinkRenderer: CompactLinkRenderer;
+};
+
+export type CompactLinkRenderer = {
+	icon: Icon;
+	title: YTRunContainer;
+	navigationEndpoint: CompactLinkRendererNavigationEndpoint;
+	trackingParams: string;
+};
+
+export type CompactLinkRendererNavigationEndpoint = {
+	clickTrackingParams: string;
+	commandMetadata: YTAutoplayVideoCommandMetadata;
+	urlEndpoint: FluffyURLEndpoint;
+};
+
+export type FluffyURLEndpoint = {
+	url: string;
+	target: string;
+};
+
+export type MenuRequest = {
+	clickTrackingParams: string;
+	commandMetadata: YTApiEndpointMetadataContainer;
+	signalServiceEndpoint: MenuRequestSignalServiceEndpoint;
+};
+
+export type MenuRequestSignalServiceEndpoint = {
+	signal: string;
+	actions: YTIndecentAction[];
+};
+
+export type YTIndecentAction = {
+	clickTrackingParams: string;
+	openPopupAction: FluffyOpenPopupAction;
+};
+
+export type FluffyOpenPopupAction = {
+	popup: TentacledPopup;
+	popupType: string;
+	beReused: boolean;
+};
+
+export type TentacledPopup = {
+	multiPageMenuRenderer: PopupMultiPageMenuRenderer;
+};
+
+export type PopupMultiPageMenuRenderer = {
+	trackingParams: string;
+	style: string;
+	showLoadingSpinner: boolean;
+};
+
+export type YTWebWatchNextResponseExtensionData = {
+	relatedVideoArgs: string;
+};

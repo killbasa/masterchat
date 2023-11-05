@@ -1,41 +1,30 @@
-import { Action } from "./actions";
-import { TimedContinuation } from "./misc";
+import type { TimedContinuation } from './misc';
+import type { Action } from './actions';
 
-export * from "./actions";
-export * from "./context";
-export * from "./contextActions";
-export * from "./misc";
-export * from "./transcript";
-export * from "./yt";
+export * from './actions';
+export * from './misc';
+export * from './yt';
 
-export interface Metadata {
-  videoId: string;
-  channelId: string;
-  channelName?: string;
-  title?: string;
-  isLive?: boolean;
-}
+export type ChatResponse = {
+	actions: Action[];
+	continuation: TimedContinuation | undefined;
+	error: null;
+};
 
-export interface ChatResponse {
-  actions: Action[];
-  continuation: TimedContinuation | undefined;
-  error: null;
-}
+export type Credentials = {
+	SAPISID: string;
+	APISID: string;
+	HSID: string;
+	SID: string;
+	SSID: string;
 
-export interface Credentials {
-  SAPISID: string;
-  APISID: string;
-  HSID: string;
-  SID: string;
-  SSID: string;
+	/**
+	 * @deprecated Use DELEGATED_SESSION_ID
+	 */
+	SESSION_ID?: string;
 
-  /**
-   * @deprecated Use DELEGATED_SESSION_ID
-   */
-  SESSION_ID?: string;
-
-  /**
-   * Delegated session id for brand account
-   */
-  DELEGATED_SESSION_ID?: string;
-}
+	/**
+	 * Delegated session id for brand account
+	 */
+	DELEGATED_SESSION_ID?: string;
+};
