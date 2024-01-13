@@ -44,7 +44,7 @@ export const b64tou8 = _atob
 	: (data: string) => {
 			const buf = Buffer.from(data, 'base64');
 			return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
-	  };
+		};
 
 export const u8tob64 = _btoa
 	? (data: Uint8Array) => _btoa(String.fromCharCode.apply(null, data as any))

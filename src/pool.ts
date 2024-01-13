@@ -21,14 +21,14 @@ export class StreamPool extends EventEmitter {
 	}
 
 	public async forEach(fn: (agent: Masterchat, videoId: string, index: number) => void) {
-		return Promise.allSettled(
+		return await Promise.allSettled(
 			this.entries.map(
 				async (
 					// @ts-expect-error ignore
 					[videoId, instance],
 					i
 				) => {
-					return Promise.resolve(
+					await Promise.resolve(
 						// eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
 						fn(instance, videoId, i)
 					);
@@ -51,7 +51,7 @@ export class StreamPool extends EventEmitter {
 	 * resolves after every stream closed
 	 */
 	public async ensure() {
-		return new Promise<void>((resolve) => {
+		await new Promise<void>((resolve) => {
 			const timer = setInterval(() => {
 				if (this.streamCount() === 0) {
 					clearInterval(timer);

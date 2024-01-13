@@ -176,7 +176,7 @@ export function runsToString(
 }
 
 export async function delay(duration: number, signal?: AbortSignal): Promise<void> {
-	return new Promise((resolve, reject): void => {
+	await new Promise((resolve, reject): void => {
 		if (signal?.aborted) {
 			reject(new AbortError());
 			return;
@@ -189,7 +189,7 @@ export async function delay(duration: number, signal?: AbortSignal): Promise<voi
 
 		const timer = setTimeout(() => {
 			signal?.removeEventListener('abort', onAbort);
-			resolve();
+			resolve(null);
 		}, duration);
 
 		signal?.addEventListener('abort', onAbort);

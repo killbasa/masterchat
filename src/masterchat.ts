@@ -123,7 +123,10 @@ export class Masterchat extends EventEmitter {
 	}
 
 	public async listen(iterateOptions?: IterateChatOptions) {
-		if (this.listener) return this.listener;
+		if (this.listener) {
+			await this.listener;
+			return;
+		}
 
 		this.listenerAbortion = new AbortController();
 
@@ -192,7 +195,7 @@ export class Masterchat extends EventEmitter {
 				this.listener = null;
 			});
 
-		return this.listener;
+		await this.listener;
 	}
 
 	/**
@@ -289,8 +292,8 @@ export class Masterchat extends EventEmitter {
 				typeof tokenOrOptions === 'string'
 					? tokenOrOptions
 					: isLive
-					? liveReloadContinuation(target, { top: topChat })
-					: replayTimedContinuation(target, { top: topChat });
+						? liveReloadContinuation(target, { top: topChat })
+						: replayTimedContinuation(target, { top: topChat });
 
 			requestBody = withContext({
 				continuation

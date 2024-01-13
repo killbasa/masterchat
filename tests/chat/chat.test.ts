@@ -1,9 +1,10 @@
 import { Masterchat } from '../../src';
+import { getMode } from '../nock';
 import axios from 'axios';
 import { setupRecorder } from 'nock-record';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-const mode = (process.env.NOCK_BACK_MODE as any) || 'lockdown';
+const mode = getMode();
 const record = setupRecorder({ mode });
 
 async function fetchUpcomingStreams() {
@@ -31,7 +32,7 @@ describe('normal live chat', () => {
 	it('context match', async () => {
 		expect(mc.videoId).toBe(subject.id);
 		expect(mc.channelId).toBe(subject.channel.id);
-	}, 60000);
+	});
 
 	it('can fetch live chat', async () => {
 		expect.assertions(3);

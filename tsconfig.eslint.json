@@ -8,8 +8,8 @@
 	"include": [
 		"src", //
 		"tests",
-		".eslintrc.js",
-		".prettierrc.js",
+		".eslintrc.cjs",
+		".prettierrc.cjs",
 		"tsup.config.ts",
 		"vitest.config.ts"
 	]

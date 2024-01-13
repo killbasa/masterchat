@@ -61,14 +61,15 @@ export type YTChatError = {
 	status: YTChatErrorStatus;
 };
 
-export enum YTChatErrorStatus {
-	Unavailable = 'UNAVAILABLE',
-	PermissionDenied = 'PERMISSION_DENIED',
-	Internal = 'INTERNAL',
-	Invalid = 'INVALID_ARGUMENT',
-	NotFound = 'NOT_FOUND',
-	Unauthenticated = 'UNAUTHENTICATED'
-}
+export const YTChatErrorStatus = {
+	Unavailable: 'UNAVAILABLE',
+	PermissionDenied: 'PERMISSION_DENIED',
+	Internal: 'INTERNAL',
+	Invalid: 'INVALID_ARGUMENT',
+	NotFound: 'NOT_FOUND',
+	Unauthenticated: 'UNAUTHENTICATED'
+} satisfies Record<string, string>;
+export type YTChatErrorStatus = (typeof YTChatErrorStatus)[keyof typeof YTChatErrorStatus];
 
 export type YTChatErrorDetail = {
 	message: string;
